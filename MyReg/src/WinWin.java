@@ -1,12 +1,15 @@
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +24,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -32,7 +36,7 @@ import java.awt.GridLayout;
 public class WinWin {
 
 	private JFrame frame;
-	Matrix beta ;
+	Matrix beta;
 	static List<String> colNames = new ArrayList<>();
 
 	/**
@@ -319,9 +323,7 @@ public class WinWin {
 			String[][] array = new String[lines.size()][0];
 			lines.toArray(array);
 
-
 			double[][] eX = new double[array.length][array[0].length];
-			
 
 			for (int i = 0; i < array.length; i++) {
 				for (int j = 0; j < array[0].length; j++) {
@@ -329,16 +331,42 @@ public class WinWin {
 				}
 			}
 			final Matrix X = new Matrix(eX);
-					
-			//Πάρε από το colNames, Αφαίρεσε το Χ
+
+			// Πάρε από το colNames, Αφαίρεσε το Χ
+			String[] newCol = new String[array.length];
 			for (int i = 0; i < array.length; i++) {
 				double predictedY = beta.getValueAt(0, 0);
 				for (int j = 1; j < beta.getNrows(); j++) {
-					int realJ = Integer.parseInt(colNames.get(j-1).substring(1))-1;//Removes the 'X'
+					int realJ = Integer.parseInt(colNames.get(j - 1).substring(1)) - 1;// Removes the 'X'
 					predictedY += beta.getValueAt(j, 0) * X.getValueAt(i, realJ);
 				}
-				System.out.println("||  -> " + new DecimalFormat("##.##").format(predictedY));
+				String newCell = new DecimalFormat("##.##").format(predictedY);
+				newCol[i] = newCell;
+				System.out.println("Πρόβλεψη " + i + " -> " + newCol[i]);
 			}
+
+			// Add new (prediction) column
+			String[][] arrayNew = new String[array.length][(array[0].length) + 1];
+			for (int r = 0; r < arrayNew.length; r++) {
+				for (int c = 0; c < array[0].length; c++) {
+					arrayNew[r][c] = array[r][c];
+				}
+				arrayNew[r][array[0].length] = newCol[r];
+			}
+
+			// Write to .csv
+			FileWriter outfile = new FileWriter("predict.csv");
+			for (int x = 0; x < arrayNew.length; x++) {
+				String content = "";
+				for (int y = 0; y < arrayNew[0].length; y++) {
+					content += arrayNew[x][y] + ";";
+				}
+				outfile.append(content + "\r\n");
+			}
+			outfile.flush();
+
+			// Show message
+			JOptionPane.showMessageDialog(frame, "<html><b><u>T</u>wo</b><br>lines</html>", "information", JOptionPane.INFORMATION_MESSAGE);
 		}
 		return returnVal;
 	}
@@ -365,7 +393,8 @@ public class WinWin {
 		}
 		System.out.println("=====================================================");
 		for (int j = 1; j < beta.getNrows(); j++) {
-			funcs += " + " + String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(j, 0))) + "*" + colNames.get(j - 1);
+			funcs += " + " + String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(j, 0))) + "*"
+					+ colNames.get(j - 1);
 		}
 		System.out.println("Η συνάρτηση είναι: "
 				+ String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(0, 0))) + funcs);
