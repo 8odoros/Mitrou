@@ -2,6 +2,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,12 +20,23 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.ui.UIUtils;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -32,12 +44,14 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import java.awt.GridLayout;
+import java.awt.Image;
 
 public class WinWin {
 
 	private JFrame frame;
 	Matrix beta;
 	static List<String> colNames = new ArrayList<>();
+	static String popup = "";
 
 	/**
 	 * @wbp.nonvisual location=117,479
@@ -77,31 +91,28 @@ public class WinWin {
 	 * @throws NoSquareException
 	 */
 	private void initialize() throws NoSquareException, IOException {
+		System.setOut(new PrintStream(new FileOutputStream("log.txt",true)));
 		frame = new JFrame();
-		frame.setBounds(100, 100, 451, 580);
+		frame.setResizable(false);
+		frame.setBounds(100, 100, 1030, 580);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
-		panel.setLayout(new GridLayout(0, 2, 0, 0));
-
-		JLabel lblNewLabel = new JLabel("Title is here");
-		lblNewLabel.setFont(new Font("whatever", Font.BOLD, 30));
-		panel.add(lblNewLabel);
+		panel.setLayout(new GridLayout(0, 5, 0, 0));
 
 		JTextArea textArea = new JTextArea();
 		textArea.setRows(30);
 		JScrollPane scroll = new JScrollPane(textArea);
 		frame.getContentPane().add(scroll, BorderLayout.SOUTH);
-
-		JLabel label = new JLabel("");
-		panel.add(label);
+		
+		JPanel panel_1 = new JPanel();
+		scroll.setColumnHeaderView(panel_1);
 
 		JButton btnNewButton = new JButton("Εύρεση συνάρτησης παλινδρόμησης");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
+	    Image img5 =  ImageIO.read(new File("icons/025-folder.png"));
+	    img5 = img5.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+	    btnNewButton.setIcon(new ImageIcon(img5));
 		panel.add(btnNewButton);
 
 		btnNewButton.addMouseListener(new MouseAdapter() {
@@ -110,7 +121,7 @@ public class WinWin {
 				try {
 					JFileChooser fileChooser = new JFileChooser();
 					frame.getContentPane().add(fileChooser, BorderLayout.NORTH);
-					createProg(fileChooser, textArea);
+					createProg(fileChooser, textArea, panel_1);
 				} catch (NoSquareException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -121,6 +132,9 @@ public class WinWin {
 			}
 		});
 		JButton btnLastButton = new JButton("Πρόβλεψη");
+	    Image img4 =  ImageIO.read(new File("icons/019-shuffle.png"));
+	    img4 = img4.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+	    btnLastButton.setIcon(new ImageIcon(img4));
 		panel.add(btnLastButton);
 
 		btnLastButton.addMouseListener(new MouseAdapter() {
@@ -139,9 +153,52 @@ public class WinWin {
 				}
 			}
 		});
+		
+		JButton btnStatsButton = new JButton("Στατιστικά");
+	    Image img3 =  ImageIO.read(new File("icons/026-bar-chart.png"));
+	    img3 = img3.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+	    btnStatsButton.setIcon(new ImageIcon(img3));
+		panel.add(btnStatsButton);
+		btnStatsButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String pop = "<html><h1>Στατιστικά</h1><b>"+popup+"</b></html>";
+				JOptionPane.showMessageDialog(frame, pop, "information", JOptionPane.INFORMATION_MESSAGE);				
+			}
+		});
+		
+
+		JButton btnHelp = new JButton("Βοήθεια");
+	    Image img2 =  ImageIO.read(new File("icons/067-chat.png"));
+	    img2 = img2.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+	    btnHelp.setIcon(new ImageIcon(img2));
+		panel.add(btnHelp);
+		btnHelp.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				JOptionPane.showMessageDialog(frame, "<html><b><u>HELP</u>me</b><br>please</html>", "help", JOptionPane.INFORMATION_MESSAGE);				
+			}
+		});
+		
+
+		JButton btnExut = new JButton("Έξοδος");
+	    Image img =  ImageIO.read(new File("icons/036-flag.png"));
+	    img = img.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+	    btnExut.setIcon(new ImageIcon(img));
+	    panel.add(btnExut);	    
+		btnExut.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+		        System.exit(0);		
+			}
+		});
+		
+		JLabel lblNewLabel = new JLabel("Multiple Regression Analysis");
+		frame.getContentPane().add(lblNewLabel, BorderLayout.NORTH);
+		lblNewLabel.setFont(new Font("Dialog", Font.BOLD, 20));
 	}
 
-	private Matrix createProg(JFileChooser chooser, JTextArea textArea) throws NoSquareException, IOException {
+	private Matrix createProg(JFileChooser chooser, JTextArea textArea, JPanel chartPanel) throws NoSquareException, IOException {
 		textArea.setText("");
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV", "csv");
 		chooser.setFileFilter(filter);
@@ -191,6 +248,7 @@ public class WinWin {
 			do {
 				if (repeat) {
 					repCounter++;
+					popup ="";					
 					System.out.println("******************!!! REPEAT !!!*********************");
 					System.out.println("Repeat no. " + repCounter + ". Removed columns index: " + repCols);
 					System.out.println("=====================================================");
@@ -258,6 +316,7 @@ public class WinWin {
 				double r2 = 1 - ei_hat2SUM / sumR;
 				// System.out.println("=====================================================");
 				System.out.println("|| r2=" + new DecimalFormat("##.##").format(r2));
+				if(r2>0.80) popup=popup.concat("<tr><td>GOOD DATA</td><tr>");
 
 				// Print tstat
 				Double[] tstat = new Double[beta.getNrows()];
@@ -267,7 +326,7 @@ public class WinWin {
 				}
 
 				// PRINT
-				printY(Y, X, beta, true);
+				printY(Y, X, beta, true, chartPanel);
 
 				// Check
 				Double myVal = null;
@@ -363,15 +422,11 @@ public class WinWin {
 				}
 				outfile.append(content + "\r\n");
 			}
-			outfile.flush();
-
-			// Show message
-			JOptionPane.showMessageDialog(frame, "<html><b><u>T</u>wo</b><br>lines</html>", "information", JOptionPane.INFORMATION_MESSAGE);
-		}
+			outfile.flush();}
 		return returnVal;
 	}
 
-	private static void printY(final Matrix Y, final Matrix X, final Matrix beta, final boolean bias)
+	private static void printY(final Matrix Y, final Matrix X, final Matrix beta, final boolean bias, JPanel jp)
 			throws FileNotFoundException {
 		String funcs = "";
 		System.out.println("=====================================================");
@@ -382,23 +437,100 @@ public class WinWin {
 
 		System.out.println("=====================================================");
 		System.out.println("|| Τιμή παρατήρησης -> Τιμή πρόβλεψης");
+	    final XYSeries ser1 = new XYSeries("Παρατήρηση");
+	    final XYSeries ser2 = new XYSeries("Πρόβλεψη");
+	    Double[] predictedYarr = new Double[Y.getNrows()]; 
 		if (bias) {
 			for (int i = 0; i < Y.getNrows(); i++) {
 				double predictedY = beta.getValueAt(0, 0);
 				for (int j = 1; j < beta.getNrows(); j++) {
 					predictedY += beta.getValueAt(j, 0) * X.getValueAt(i, j - 1);
 				}
+				predictedYarr[i] = predictedY;
+			    ser1.add(i, Y.getValueAt(i, 0));
+			    ser2.add(i, predictedY);
 				System.out.println("|| " + Y.getValueAt(i, 0) + " -> " + new DecimalFormat("##.##").format(predictedY));
 			}
+			
+			//Mean, Deviation e.t.c.
+			double count = predictedYarr.length;   // is 10.0 for your problem
+			double sum1 = 0.0;    // sum of the numbers
+			double sum2 = 0.0;    // sum of the squares
+			int mark0_10=0;
+			int mark10_14=0;
+			int mark14_17=0;
+			int mark17_20=0;
+			double smallest = 20;
+			int smallestInd = -1;
+			double biggest = 0;
+			int biggestInd = -1;
+			for (int i=0; i < predictedYarr.length; i++) {
+				if(predictedYarr[i]<smallest) {
+					smallest = predictedYarr[i];
+					smallestInd = i;
+				}
+				if(predictedYarr[i]>biggest) {
+					biggest = predictedYarr[i];
+					biggestInd=i;
+				}
+				
+				if(predictedYarr[i]<10) mark0_10++;
+				else if(predictedYarr[i]<14) mark10_14++;
+				else if(predictedYarr[i]<17) mark14_17++;
+				else  mark17_20++;
+				
+				sum1 += predictedYarr[i];
+				sum2 += predictedYarr[i] * predictedYarr[i];
+			}
+			popup=popup.concat("<table style='border: 1px solid black;'>");
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>Biggest</td><td>"+biggest+" (Pupil No."+biggestInd+")</td><tr>");
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>Smallest</td><td>"+smallest+" (Pupil No."+smallestInd+")</td><tr>");
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>0-10</td><td>"+(100*mark0_10/predictedYarr.length)+"%</td><tr>");
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>10-14</td><td>"+(100*mark10_14/predictedYarr.length)+"%</td><tr>");
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>14-17</td><td>"+(100*mark14_17/predictedYarr.length)+"%</td><tr>");
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>17-20</td><td>"+(100*mark17_20/predictedYarr.length)+"%</td><tr>");
+			double average = sum1 / count;	
+			popup=popup.concat("<tr><td style='border: 1px solid black;'>average</td><td>"+average+"</td><tr>");
+			double variance = (count * sum2 - sum1 * sum1) / (count * count);
+			popup= popup.concat("<tr><td style='border: 1px solid black;'>variance</td><td>"+variance+"</td><tr>");
+			double stdev = Math.sqrt(variance); 
+			popup= popup.concat("<tr><td style='border: 1px solid black;'>stdev</td><td>"+stdev+"</td><tr>");
+			popup=popup.concat("</table>");
 		}
+	    
 		System.out.println("=====================================================");
 		for (int j = 1; j < beta.getNrows(); j++) {
-			funcs += " + " + String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(j, 0))) + "*"
+			funcs +=(beta.getValueAt(j, 0)>0)? " + ":" " ;//Only for possitive numbers
+			funcs += String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(j, 0))) + "*"
 					+ colNames.get(j - 1);
 		}
 		System.out.println("Η συνάρτηση είναι: "
 				+ String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(0, 0))) + funcs);
 		System.out.println("=====================================================");
+		
+
+	    final XYSeriesCollection data = new XYSeriesCollection();
+	    data.addSeries(ser1);
+	    data.addSeries(ser2);
+	    final JFreeChart chart = ChartFactory.createScatterPlot(
+	    	"Συνάρτηση: "+String.valueOf(new DecimalFormat("##.##").format(beta.getValueAt(0, 0))) + funcs,
+	        "Μαθητές", 
+	        "Επιδόσεις", 
+	        data,
+	        PlotOrientation.VERTICAL,
+	        true,
+	        true,
+	        false
+	    );
+
+	    final ChartPanel chartPanel = new ChartPanel(chart);
+	    chartPanel.setPreferredSize(new java.awt.Dimension(1000, 270));
+	    jp.removeAll();
+	    jp.add(chartPanel);
+	    /*demo.pack();
+	    UIUtils.centerFrameOnScreen(demo);
+	    demo.setVisible(true);
+	    */
 	}
 
 	private static String[][] removeCol(String[][] array, int colRemove) {
